@@ -1,0 +1,261 @@
+---
+title: "Interactive GeoSpatial Visualization using R/D3"
+author: "Ravina Gelda"
+date: "January 20, 2021"
+output: html_document
+self_contained: no
+always_allow_html: yes
+---
+
+
+ 
+**Projects Overview**
+
+ 
+*Subtitle: India Population Density and Criminal Justice Data at various Resolutions*
+
+The Indian census provides incredibe wealth of data but its not always easy to work with it. Working with the tabular and spatial census data can be handled in R but getting the data, reading it into R and in particular mering tabular and spatial data canbe a chore. Working with slots and different classes of data and functions can be challenging. 
+
+*Project A: Telangana Criminal Justice Data (2011) in R*
+This project visualizes crime against women in some regions of Telangana, India. The visualization is at a high resolution for areas covered by a few police stations inside Telangana. 
+
+Telangana is a state in south central India created in June 2014. This state is divided into 33 districts and 584 mandals. 
+
+
+
+```{r, echo=FALSE, message=FALSE, include=FALSE}
+library(rgdal)
+library(leaflet)
+library(htmlwidgets)
+library(htmltools)
+```
+
+```{r, echo=FALSE, message=FALSE}
+#library(rgdal)
+#library(leaflet)
+telangana = readOGR(dsn = "D:/ravina_ucsc_project/TSDM", layer = 'Mandal_Boundary')
+
+#plot(telangana,fill=T,col = brewer.pal(15, "Set3"))
+#points(chi_tab, pch = 20,cex = 0.2, col = "black")
+
+df.polygon = readOGR(dsn = "D:/ravina_ucsc_project/TSDM", layer = 'District_Boundary')
+
+popup <- paste0("District: ", df.polygon$Dist_Name, "<br>" )
+
+tag.map.title <- tags$style(HTML("
+  .leaflet-control.map-title { 
+    transform: translate(-50%,20%);
+    position: fixed !important;
+    left: 10%;
+    text-align: center;
+    padding-left: 2px; 
+    padding-right: 2px; 
+    background: rgba(255,255,255,0.75);
+    font-weight: bold;
+    font-size: 20px;
+  }
+"))
+title1 <- tags$div(
+  tag.map.title, HTML("District level Telangana Map with tooltip")
+)
+
+map2<-leaflet() %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    addPolygons(data = df.polygon, 
+                fillColor = c("red","blue","green","violet","yellow","pink","brown"), 
+                color = "#b2aeae", # you need to use hex colors
+                fillOpacity = 0.7, 
+                weight = 1, 
+                smoothFactor = 0.2,
+                popup = popup)%>% addTiles() %>%
+  addControl(title1, position = "topleft", className="map-title")
+
+map2
+
+
+df.polygon2 = readOGR(dsn = "D:/ravina_ucsc_project/TSDM", layer = 'Mandal_Boundary')
+
+popup <- paste0("Mandal: ", df.polygon2$Mandal_Nam, "<br>" )
+ 
+tag.map.title <- tags$style(HTML("
+  .leaflet-control.map-title { 
+    transform: translate(-50%,20%);
+    position: fixed !important;
+    left: 10%;
+    text-align: center;
+    padding-left: 2px; 
+    padding-right: 2px; 
+    background: rgba(255,255,255,0.75);
+    font-weight: bold;
+    font-size: 20px;
+  }
+"))
+title2 <- tags$div(
+  tag.map.title, HTML("Sub-District level Telangana Map with tooltip")
+)
+map2<-leaflet() %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    addPolygons(data = df.polygon2, 
+                fillColor = c("red","blue","green","violet","yellow","pink","brown"), 
+                color = "#b2aeae", # you need to use hex colors
+                fillOpacity = 0.7, 
+                weight = 1, 
+                smoothFactor = 0.2,
+                popup = popup)%>% addTiles() %>%
+  addControl(title2, position = "topleft", className="map-title")
+map2
+
+```
+The crime data belongs to 3 police stations within the following districts. Describe the sample crime data in words emphasizing the variables that you will visualize (for example, lat-long etc.). The time period of data, sample size etc. 
+
+```{r, echo=FALSE, message=FALSE}
+library(data.table)
+library(sp)
+library(rgdal)
+library(ggplot2)
+library(RColorBrewer)
+
+
+  
+#read in data table
+tel_dat = fread("D:/TelanganaV4/TelanganaV4/csv_data/RACHAKONDA_CAWSTATS-2019.csv")
+
+#convert to data table
+tel_dat = as.data.table(tel_dat)
+ 
+tel_dat = tel_dat[Latitude!=""]
+tel_dat = tel_dat[Longitude!=""]
+tel_dat = tel_dat[ ,c(1,2,3,4,5,8,9,10)]
+
+print.data.frame(head(tel_dat ))
+```
+
+```{r, echo=FALSE, message=FALSE}
+
+police_stations = unique(tel_dat$`Police Station`)
+```
+**Police Stations**
+```{r, echo=FALSE, message=FALSE}
+print(police_stations)
+```
+**Zones**
+```{r, echo=FALSE, message=FALSE}
+print(unique(tel_dat$Zone))
+```
+**DIVISIONS**
+```{r, echo=FALSE, message=FALSE}
+print(unique(tel_dat$Division))
+
+```
+
+
+```{r, echo=FALSE, message=FALSE}
+library(sf) 
+colnames(tel_dat)[6] <- "lat"
+colnames(tel_dat)[7] <- "long"
+ 
+coordinates(tel_dat) = c("long","lat")
+crs.geo1 = CRS("+proj=longlat")  
+proj4string(tel_dat) = crs.geo1  
+
+#plot(chi_tab, pch = 20, col = "steelblue")
+ 
+
+#read shape files
+#read in shapefile of telangana
+#library(RColorBrewer)
+#telangana = readOGR(dsn = "D:/ravina_ucsc_project/TSDM", layer = 'Mandal_Boundary')
+quakeIcons <- makeIcon("C:/Users/Hardik/Desktop/master_proj_imanges/marker.png", iconWidth = 3, iconHeight =3)
+tag.map.title <- tags$style(HTML("
+  .leaflet-control.map-title { 
+    transform: translate(-50%,20%);
+    position: fixed !important;
+    left: 10%;
+    text-align: center;
+    padding-left: 2px; 
+    padding-right: 2px; 
+    background: rgba(255,255,255,0.75);
+    font-weight: bold;
+    font-size: 20px;
+  }
+"))
+title3 <- tags$div(
+  tag.map.title, HTML("Sub-District level Telangana Map with crime data plotted for 3 police stations")
+)
+map2<-leaflet() %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    addPolygons(data = df.polygon2, 
+                fillColor = c("red","blue","green","violet","yellow","pink","brown"), 
+                color = "#b2aeae", # you need to use hex colors
+                fillOpacity = 0.7, 
+                weight = 1, 
+                smoothFactor = 0.2,
+                popup = popup)%>% addMarkers(tel_dat$long,tel_dat$lat ,popup='crime data',icon = quakeIcons)%>% addTiles()%>%addControl(title3, position = "topleft", className="map-title")
+
+map2
+
+
+tag.map.title <- tags$style(HTML("
+  .leaflet-control.map-title { 
+    transform: translate(-50%,20%);
+    position: fixed !important;
+    left: 10%;
+    text-align: center;
+    padding-left: 2px; 
+    padding-right: 2px; 
+    background: rgba(255,255,255,0.75);
+    font-weight: bold;
+    font-size: 20px;
+  }
+"))
+title4 <- tags$div(
+  tag.map.title, HTML("Sub-District level Telangana Map with crime data plotted for 3 police stations")
+)
+popup <- paste0("District: ", df.polygon$Dist_Name, "<br>" )
+ map2<-leaflet() %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    addPolygons(data = df.polygon, 
+                fillColor = c("red","blue","green","violet","yellow","pink","brown"), 
+                color = "#b2aeae", # you need to use hex colors
+                fillOpacity = 0.7, 
+                weight = 1, 
+                smoothFactor = 0.2,
+                popup = popup)%>% addMarkers(tel_dat$long,tel_dat$lat ,popup='crime data',icon = quakeIcons)%>% addTiles()%>%addControl(title4, position = "topleft", className="map-title") 
+ 
+map2
+
+#leaflet(data = tel_dat) %>%
+#    addTiles() %>%
+#    addMarkers(popup = tel_dat$`Crime Number`)
+leaflet(data = tel_dat) %>%
+    addTiles() %>%
+    addMarkers(popup = tel_dat$`Crime Number`,clusterOptions = markerClusterOptions())
+	
+```
+**Major Libraries**
+
+* rgdal: The rgdal package provides bindings to the Geospatial Data Abstraction Library(GDAL) for reading, writing and converting between spatial formats.  There are several speciality packages for reading or writing various formats (e.g, geojsonio,plotKML) but one function readOGR, one package rgdal suffices for reading spatial files. And hence, we used rgdal in this project to read the shape file.
+
+* ggplot2:   
+
+* dplyr:dplyr is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges:
+mutate() adds new variables that are functions of existing variables
+select() picks variables based on their names.
+filter() picks cases based on their values.
+summarise() reduces multiple values down to a single summary.
+arrange() changes the ordering of the rows.
+ 
+* sp,sf :  R has well-supported classes for sorting spatial data (sp) and interfacing to the above mentioned environments (rgdal, rgeos), but has so far lacked a complete implementation of simple features, making conversions at times convoluted. The package sf tries to fill the gaps and aims at succeeding spin long term.
+
+* leaflet: The leaflet package requires the data input to be a spatial object. In this project example, I started with a SpatialPolygonsDataFrame (which we created by reading shapefiles using readORG) and then I converted this to a vanilla data frame using the fortify function. Then can make use of your existing spatial data frame to plot data with leaflet.  
+
+**Challenges Faced**
+
+* Main challenge was to get the shape file of telangana
+* Data Cleaning
+
+**Project B:  India Population Density District-Wise (2011) in R**
+ 
+
+**Challenges**
+

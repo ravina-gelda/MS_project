@@ -1,0 +1,7 @@
+name: Publish Document
+account: rpubs
+server: rpubs.com
+bundleId:
+        https://api.rpubs.com/api/v1/document/715772/768a140dba2645fa96748ca88bba8fe2
+url: http://rpubs.com/ravina/715772
+when: 1611271317.68961

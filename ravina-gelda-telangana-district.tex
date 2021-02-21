@@ -1,0 +1,227 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Interactive GeoSpatial Visualization using R/D3},
+  pdfauthor={Ravina Gelda},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Interactive GeoSpatial Visualization using R/D3}
+\author{Ravina Gelda}
+\date{January 20, 2021}
+
+\begin{document}
+\maketitle
+
+\textbf{Projects Overview}
+
+\emph{Subtitle: India Population Density and Criminal Justice Data at
+various Resolutions}
+
+The Indian census provides incredibe wealth of data but its not always
+easy to work with it. Working with the tabular and spatial census data
+can be handled in R but getting the data, reading it into R and in
+particular mering tabular and spatial data canbe a chore. Working with
+slots and different classes of data and functions can be challenging.
+
+\emph{Project A: Telangana Criminal Justice Data (2011) in R} This
+project visualizes crime against women in some regions of Telangana,
+India. The visualization is at a high resolution for areas covered by a
+few police stations inside Telangana.
+
+Telangana is a state in south central India created in June 2014. This
+state is divided into 33 districts and 584 mandals.
+
+\begin{verbatim}
+## OGR data source with driver: ESRI Shapefile 
+## Source: "D:\ravina_ucsc_project\TSDM", layer: "Mandal_Boundary"
+## with 589 features
+## It has 20 fields
+\end{verbatim}
+
+\begin{verbatim}
+## OGR data source with driver: ESRI Shapefile 
+## Source: "D:\ravina_ucsc_project\TSDM", layer: "District_Boundary"
+## with 33 features
+## It has 17 fields
+\end{verbatim}
+
+\hypertarget{htmlwidget-f74aad7c099f49d6eb2c}{}
+
+\begin{verbatim}
+## OGR data source with driver: ESRI Shapefile 
+## Source: "D:\ravina_ucsc_project\TSDM", layer: "Mandal_Boundary"
+## with 589 features
+## It has 20 fields
+\end{verbatim}
+
+\hypertarget{htmlwidget-98a77937f18e957a0a01}{}
+
+The crime data belongs to 3 police stations within the following
+districts. Describe the sample crime data in words emphasizing the
+variables that you will visualize (for example, lat-long etc.). The time
+period of data, sample size etc.
+
+\begin{verbatim}
+##   S.No     Zone Division Police Station Crime Number Latitude Longitude
+## 1    1 Bhongiri Bhongiri    Bhongir (R)    0038/2019 17.53920  78.85042
+## 2    2 Bhongiri Bhongiri    Bhongir (R)    0042/2019 17.51170  79.01672
+## 3    3 Bhongiri Bhongiri    Bhongir (R)    0043/2019 17.56275  78.89477
+## 4    4 Bhongiri Bhongiri    Bhongir (R)    0063/2019 17.53511  78.86300
+## 5    5 Bhongiri Bhongiri    Bhongir (R)    0097/2019 17.50737  79.03002
+## 6    6 Bhongiri Bhongiri    Bhongir (R)    0121/2019 17.38430  78.90866
+##   Present stage
+## 1            PT
+## 2            PT
+## 3            PT
+## 4   Compromised
+## 5            PT
+## 6   Compromised
+\end{verbatim}
+
+\textbf{Police Stations}
+
+\begin{verbatim}
+##  [1] "Bhongir (R)"     "Bhongir TN"      "Bibinagar"       "Bommala Ramaram"
+##  [5] "Addaguduru"      "Atmakur (M)"     "Choutuppal"      "Mothkur"        
+##  [9] "Narayanapur"     "Pochampalli"     "Ramannapet"      "Valigonda"      
+## [13] "Alair"           "Motakondur"      "Rajapet"         "Thurkapalli"    
+## [17] "Yadagirigutta"   "Adibatla"        "Ibrahimpatnam"   "Kandukur"       
+## [21] "Madgul"          "Maheswaram"      "Manchal"         "Yacharam"       
+## [25] "Chaitanyapuri"   "L.B. Nagar"      "Saroornagar"     "Abdullapurmet"  
+## [29] "Balapur"         "Hayathnagar"     "Meerpet"         "Pahadisharief"  
+## [33] "Vanasthalipuram" "Jawaharnagar"    "Keesara"         "Kusaiguda"      
+## [37] "Neredmet"        "Ghatkesar"       "Malkajgiri"      "Medipally"      
+## [41] "Nacharam"        "Uppal"
+\end{verbatim}
+
+\textbf{Zones}
+
+\begin{verbatim}
+## [1] "Bhongiri"   "LB Nagar"   "Malkajgiri"
+\end{verbatim}
+
+\textbf{DIVISIONS}
+
+\begin{verbatim}
+## [1] "Bhongiri"       "Choutuppal"     "Yadadri"        "Ibrahimpatnam" 
+## [5] "Ibrahimptnam"   "LB Nagar"       "Vanastalipuram" "Kushaiguda"    
+## [9] "Malkajgiri"
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'sf' was built under R version 4.0.3
+\end{verbatim}
+
+\hypertarget{htmlwidget-dc1f28fc9f8c16ae1a84}{}
+
+\hypertarget{htmlwidget-6a89b700e866d754fd64}{}
+
+\hypertarget{htmlwidget-675141be54ced15706bd}{}
+
+\textbf{Major Libraries}
+
+\begin{itemize}
+\item
+  rgdal: The rgdal package provides bindings to the Geospatial Data
+  Abstraction Library(GDAL) for reading, writing and converting between
+  spatial formats. There are several speciality packages for reading or
+  writing various formats (e.g, geojsonio,plotKML) but one function
+  readOGR, one package rgdal suffices for reading spatial files. And
+  hence, we used rgdal in this project to read the shape file.
+\item
+  ggplot2:
+\item
+  dplyr:dplyr is a grammar of data manipulation, providing a consistent
+  set of verbs that help you solve the most common data manipulation
+  challenges: mutate() adds new variables that are functions of existing
+  variables select() picks variables based on their names. filter()
+  picks cases based on their values. summarise() reduces multiple values
+  down to a single summary. arrange() changes the ordering of the rows.
+\item
+  sp,sf : R has well-supported classes for sorting spatial data (sp) and
+  interfacing to the above mentioned environments (rgdal, rgeos), but
+  has so far lacked a complete implementation of simple features, making
+  conversions at times convoluted. The package sf tries to fill the gaps
+  and aims at succeeding spin long term.
+\item
+  leaflet: The leaflet package requires the data input to be a spatial
+  object. In this project example, I started with a
+  SpatialPolygonsDataFrame (which we created by reading shapefiles using
+  readORG) and then I converted this to a vanilla data frame using the
+  fortify function. Then can make use of your existing spatial data
+  frame to plot data with leaflet.
+\end{itemize}
+
+\textbf{Challenges Faced}
+
+\begin{itemize}
+\tightlist
+\item
+  Main challenge was to get the shape file of telangana
+\item
+  Data Cleaning
+\end{itemize}
+
+\textbf{Project B: India Population Density District-Wise (2011) in R}
+
+\textbf{Challenges}
+
+\end{document}
